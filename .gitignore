@@ -1,0 +1,24 @@
+# Environment and local overrides
+.env
+.env.*
+!.env.example
+
+# Editor/OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+logs/
+*.log
+*.tmp
+
+# Node/JS (if used in the future)
+node_modules/
+.npmrc
+
+# Python (if used in the future)
+__pycache__/
+*.pyc
+
+# Podman/docker artifacts (if any are exported)
+*.tar
