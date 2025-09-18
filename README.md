@@ -12,10 +12,10 @@ Apache Kafka development environment with Web UI using Podman, organized in a Po
 Copy `.env.example` to `.env` and adjust as needed. Default values avoid port conflicts with other pods (Stalwart Email, Plane PM):
 
 - LAN host: `BOKO_HOST=bokodell14.local`
-- Ports:
+- Ports (>= 19000):
   - `BROKER_PORT=19092` (Kafka Broker)
-  - `ZK_PORT=12181` (Zookeeper)
-  - `UI_PORT=8087` (Kafka UI)
+  - `ZK_PORT=19181` (Zookeeper)
+  - `UI_PORT=19081` (Kafka UI)
 - Versions:
   - `CP_VERSION=7.5.3` (Kafka/ZK)
   - `KAFKA_UI_TAG=latest`
@@ -55,12 +55,12 @@ Note: for access from other machines on the LAN, ensure `bokodell14.local` resol
 ## Services (defaults)
 
 - Kafka Broker: bokodell14.local:19092
-- Kafka Web UI: <http://bokodell14.local:8087>
-- Zookeeper: bokodell14.local:12181
+- Kafka Web UI: <http://bokodell14.local:19081>
+- Zookeeper: bokodell14.local:19181
 
 ## Avoiding port conflicts
 
-This project uses non-standard ports by default. If other pods use the same ports, change them in `.env`:
+This project uses non-standard ports (>=19000) by default. If other pods use the same ports, change them in `.env`:
 
 - `BROKER_PORT` to another free port (e.g., 29092)
 - `UI_PORT` to another free HTTP port (e.g., 8090)
@@ -69,7 +69,7 @@ This project uses non-standard ports by default. If other pods use the same port
 Check ports in use:
 
 ```bash
-ss -tlnp | grep -E "(19092|8087|12181)"
+ss -tlnp | grep -E "(19092|19081|19181)"
 ```
 
 ## Persistence
@@ -78,11 +78,12 @@ Data is persisted in Podman volumes: `bk_kafka_data`, `bk_zk_data`, `bk_zk_log`.
 
 ## Firewall (optional)
 
-Example UFW rules to allow access on local network 192.168.0.0/16:
+Example UFW rules to allow access on local network 192.168.0.0/16 only:
 
 ```bash
 sudo ufw allow from 192.168.0.0/16 to any port 19092 proto tcp
-sudo ufw allow from 192.168.0.0/16 to any port 8087 proto tcp
+sudo ufw allow from 192.168.0.0/16 to any port 19081 proto tcp
+sudo ufw allow from 192.168.0.0/16 to any port 19181 proto tcp
 ```
 
 ## Troubleshooting

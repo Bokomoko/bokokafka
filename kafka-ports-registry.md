@@ -15,7 +15,7 @@ Default host: `bokodell14.local`
 
 ### Kafka Web UI
 
-- Port: 8087
+- Port: 19081
 - Protocol: TCP/HTTP
 - Access: Local network (192.168.0.0/16)
 - Container: bk-kafka-ui
@@ -25,7 +25,7 @@ Default host: `bokodell14.local`
 
 ### Zookeeper
 
-- Port: 12181
+- Port: 19181
 - Protocol: TCP
 - Access: Local/Containers
 - Container: bk-kafka-zookeeper
@@ -41,7 +41,7 @@ Default host: `bokodell14.local`
 sudo ufw allow from 192.168.0.0/16 to any port 19092 proto tcp
 
 # Kafka Web UI - Local network
-sudo ufw allow from 192.168.0.0/16 to any port 8087 proto tcp
+sudo ufw allow from 192.168.0.0/16 to any port 19081 proto tcp
 ```
 
 ## Management Commands
@@ -53,10 +53,10 @@ sudo ufw allow from 192.168.0.0/16 to any port 8087 proto tcp
 podman ps
 
 # Check ports
-ss -tlnp | grep -E "(19092|8087|12181)"
+ss -tlnp | grep -E "(19092|19081|19181)"
 
 # Test connectivity
-curl -s http://bokodell14.local:8087
+curl -s http://bokodell14.local:19081
 ```
 
 ## Avoiding Conflicts

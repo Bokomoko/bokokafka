@@ -14,8 +14,8 @@ fi
 # Defaults
 BOKO_HOST=${BOKO_HOST:-bokodell14.local}
 BROKER_PORT=${BROKER_PORT:-19092}
-ZK_PORT=${ZK_PORT:-12181}
-UI_PORT=${UI_PORT:-8087}
+ZK_PORT=${ZK_PORT:-19181}
+UI_PORT=${UI_PORT:-19081}
 CP_VERSION=${CP_VERSION:-7.5.3}
 KAFKA_UI_TAG=${KAFKA_UI_TAG:-latest}
 POD_NAME=${POD_NAME:-bk-kafka}
@@ -60,9 +60,25 @@ if ! podman pod exists "$POD_NAME"; then
         --name "$POD_NAME" \
         -p ${ZK_PORT}:2181 \
         -p ${BROKER_PORT}:9092 \
-        -p ${UI_PORT}:8080 >/dev/null
+                -p ${UI_PORT}:8080 >/dev/null
 else
         echo "📦 Pod ${POD_NAME} already exists"
+        # Ensure published ports match desired config; if not, recreate pod
+        current_ports=$(podman pod inspect "$POD_NAME" | jq -r '.Config.PortMappings[]? | "\(.HostPort):\(.ContainerPort)"')
+        need_recreate=0
+        echo "$current_ports" | grep -q "${ZK_PORT}:2181" || need_recreate=1
+        echo "$current_ports" | grep -q "${BROKER_PORT}:9092" || need_recreate=1
+        echo "$current_ports" | grep -q "${UI_PORT}:8080" || need_recreate=1
+        if [ "$need_recreate" -eq 1 ]; then
+                echo "♻️ Recreating pod to apply new ports..."
+                podman pod stop "$POD_NAME" >/dev/null || true
+                podman pod rm "$POD_NAME" >/dev/null || true
+                podman pod create \
+                        --name "$POD_NAME" \
+                        -p ${ZK_PORT}:2181 \
+                        -p ${BROKER_PORT}:9092 \
+                        -p ${UI_PORT}:8080 >/dev/null
+        fi
 fi
 
 # Zookeeper
@@ -129,7 +145,7 @@ else
         --pod ${POD_NAME} \
         --restart=${RESTART_POLICY} \
         -e KAFKA_CLUSTERS_0_NAME=local \
-            -e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=localhost:9092 \
+                -e KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=localhost:9092 \
         -e SERVER_PORT=8080 \
         provectuslabs/kafka-ui:${KAFKA_UI_TAG} >/dev/null
 fi
